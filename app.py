@@ -88,7 +88,7 @@ machine_learning_training_layout = html.Div([
 
 # Define layout for ransomware prediction section
 ransomware_prediction_layout = html.Div([
-    html.H2("Ransomware Prediction (Random Forest Model)", style={'text-align': 'center', 'margin-bottom': '20px'}),
+    html.H2("Ransomware Prediction", style={'text-align': 'center', 'margin-bottom': '20px'}),
     html.Div([
         dcc.Input(id='folder-path', type='text', placeholder='Folder path...', value='/Users/admin/11.SaskPoly/4.Innovation/4.test/misc', style={'width': '30%', 'margin-right': '10px'}),
         html.Button('Predict', id='predict-button', n_clicks=0, style={'width': '15%'})
@@ -117,7 +117,13 @@ def predict_ransomware(n_clicks, folder_path):
         new_data_transformed = scaler.transform(new_data[['File Size', 'Entropy']])
 
         # Make predictions using Random Forest model
-        predictions = ml.rf_predict(x, y, new_data_transformed)
+        bestAccuracy = max(rf_accuracy, knn_accuracy, nb_accuracy)
+        if bestAccuracy == rf_accuracy:
+            predictions = ml.rf_predict(x, y, new_data_transformed)
+        elif bestAccuracy == knn_accuracy:
+            predictions = ml.knn_predict(x, y, new_data_transformed)
+        else:
+            predictions = ml.nb_predict(x, y, new_data_transformed)
 
         # Write the results back to the CSV file
         new_data['Ransomware'] = predictions

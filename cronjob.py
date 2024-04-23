@@ -1,38 +1,10 @@
-import schedule # type: ignore
-import time
-import sys
 import os
-import shutil
 import csv
 import scanfile as scan
-
-# Define folder paths
-folder_path = "test/ransomware"
-output_folder = "data"
-predict_folder = "predict"
-csv_filename = "files_scan_all.csv"
-csv_path = os.path.join(output_folder, csv_filename)
-# Check if folder_path is provided as command-line argument
-if len(sys.argv) >= 2:
-    folder_path = sys.argv[1]
-
-def scan_and_write_csv(folder_path):
-    print("Scanning files, calculating entropy and writing to csv")
-    try:
-        scan.scanfile_csv(folder_path, csv_path)  # Call the scanfile_csv function with parameters
-    except Exception as e:
-        print(f"Error Scanning files, calculating entropy and writing to csv: {e}")
-
-    print("Scan completed.")
-    print(f"Copying files_scan.csv to {predict_folder}...")
-    # Copy the files_scan.csv file to the predict folder
-    shutil.copy(csv_path, os.path.join(predict_folder, csv_filename))
-    print("Copy completed.")
 
 def scan_all_files(folder_path):
     """Recursively scan all files in the folder and subfolders."""
     file_details = []
-
     for root, dirs, files in os.walk(folder_path):
         print(f"Start scanning folder {root}...")
         for file_name in files:
@@ -71,20 +43,39 @@ def scan_all(folder_path, csv_filename):
 if __name__ == "__main__":
     # Get the current directory
     current_directory = os.getcwd()
-    # Get the parent directory
     parent_directory = os.path.dirname(current_directory)
     # Define folder paths
     print(f"Parent {parent_directory}...")
-   
     folder_path = os.path.join(parent_directory, "training")
     print(f"Folder {folder_path}...")
-    
-    #folder_path = "NapierOne-tiny"
     output_folder = "data"
-    csv_filename = "all_files.csv"
+    csv_filename = "pretrained_data.csv"
     csv_path = os.path.join(output_folder, csv_filename)
     # Scan files and write to CSV
     scan_all(folder_path, csv_path)
+
+# Define folder paths
+# folder_path = "test/ransomware"
+# output_folder = "data"
+# predict_folder = "predict"
+# csv_filename = "files_scan_all.csv"
+# csv_path = os.path.join(output_folder, csv_filename)
+# # Check if folder_path is provided as command-line argument
+# if len(sys.argv) >= 2:
+#     folder_path = sys.argv[1]
+
+# def scan_and_write_csv(folder_path):
+#     print("Scanning files, calculating entropy and writing to csv")
+#     try:
+#         scan.scanfile_csv(folder_path, csv_path)  # Call the scanfile_csv function with parameters
+#     except Exception as e:
+#         print(f"Error Scanning files, calculating entropy and writing to csv: {e}")
+
+#     print("Scan completed.")
+#     print(f"Copying files_scan.csv to {predict_folder}...")
+#     # Copy the files_scan.csv file to the predict folder
+#     shutil.copy(csv_path, os.path.join(predict_folder, csv_filename))
+#     print("Copy completed.")
 
 # Schedule the job to run every 5 minutes
 #schedule.every(5).minutes.do(scan_all, folder_path,csv_filename)
