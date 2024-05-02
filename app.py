@@ -30,6 +30,7 @@ y = data['Ransomware']
 knn_accuracy, _, _, knn_confmatrix = ml.knn_evaluate(x, y)
 nb_accuracy, _, _, nb_confmatrix = ml.nb_evaluate(x, y)
 rf_accuracy, _, _, rf_confmatrix = ml.rf_evaluate(x, y)
+gb_accuracy, _, _, gb_confmatrix = ml.gb_evaluate(x, y)
 
 # Create Dash app
 app = dash.Dash(__name__)
@@ -72,23 +73,28 @@ machine_learning_training_layout = html.Div([
             html.H4("KNN Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
             html.P(f"KNN Accuracy: {knn_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
             dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top', 'margin-right': '20px'}),
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             html.H4("Naive Bayes Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
             html.P(f"Naive Bayes Accuracy: {nb_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
             dcc.Graph(id='nb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top', 'margin-right': '20px'}),
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        html.Div([
+            html.H4("Gradient Boosting Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
+            html.P(f"Gradient Boosting Accuracy: {gb_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
+            dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             html.H4("Random Forest Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
             html.P(f"Random Forest Accuracy: {rf_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
             dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
 ])
 
 # Define layout for ransomware prediction section
 ransomware_prediction_layout = html.Div([
-    html.H2("Ransomware Prediction", style={'text-align': 'center', 'margin-bottom': '20px'}),
+    html.H2("Ransomware Prediction (Best Model)", style={'text-align': 'center', 'margin-bottom': '20px'}),
     html.Div([
         dcc.Input(id='folder-path', type='text', placeholder='Folder path...', value='/Users/admin/11.SaskPoly/4.Innovation/4.test/misc', style={'width': '30%', 'margin-right': '10px'}),
         html.Button('Predict', id='predict-button', n_clicks=0, style={'width': '15%'})
@@ -159,4 +165,4 @@ app.layout = html.Div([
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)

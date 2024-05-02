@@ -4,6 +4,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, f1_score, confusion_matrix
+from sklearn.ensemble import GradientBoostingClassifier
 
 def knn_evaluate(x, y):
     # Splitting the dataset into the Training set and Test set
@@ -123,7 +124,44 @@ def rf_predict(x_train, y_train, new_data):
     
     return rf_predictions
     
+def gb_evaluate(x, y):
+    # Splitting the dataset into the Training set and Test set
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=2)
 
+    # Feature Scaling
+    sc = StandardScaler()
+    x_train = sc.fit_transform(x_train)
+    x_test = sc.transform(x_test)
+
+    # Train the Gradient Boosting model
+    gb_classifier = GradientBoostingClassifier()
+    gb_classifier.fit(x_train, y_train)
+
+    # Predicting the Test set results
+    y_pred = gb_classifier.predict(x_test)
+
+    # Model evaluation
+    accuracy = accuracy_score(y_pred, y_test)
+    report = classification_report(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, zero_division=1)
+    conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
+
+    return accuracy, report, f1, conf_matrix
+
+def gb_predict(x_train, y_train, new_data):
+    # Feature Scaling
+    sc = StandardScaler()
+    x_train = sc.fit_transform(x_train)
+    
+    # Train the Gradient Boosting model
+    gb_classifier = GradientBoostingClassifier()
+    gb_classifier.fit(x_train, y_train)
+
+    new_data = sc.transform(new_data)
+    # Predicting the Test set results
+    gb_predictions = gb_classifier.predict(new_data)
+    
+    return gb_predictions
 
 
 
