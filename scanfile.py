@@ -54,6 +54,7 @@ csv_filename = "files_scan.csv"
 csv_path = os.path.join(output_folder, csv_filename)
 
 def scan_file_csv(folder_path):
+    print("Scan folder: ", folder_path)
     try:
         scanfile_csv(folder_path, csv_path)  # Call the scanfile_csv function with parameters
     except Exception as e:

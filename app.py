@@ -37,29 +37,29 @@ app = dash.Dash(__name__)
 
 # Define header layout
 header_layout = html.Header([
-    html.H1("Machine Learning and File Entropy Based for Ransomware Detection", style={'text-align': 'center'}),
+    html.H1("AI-powered Ransomware Detection System", style={'text-align': 'center','color': '#21130d'}),
     html.Hr()
 ])
 
 # Define footer layout
 footer_layout = html.Footer([
     html.Hr(),
-    html.P("© 2024 Saskatchewan Polytechnic Innovation Research", style={'text-align': 'center'})
+    html.P("© 2024 Saskatchewan Polytechnic Applied Research", style={'text-align': 'center','color': '#21130d'})
 ])
 
 # Define layout for dataset attribute section
 data_training_layout = html.Div([
-    html.H2("Dataset Attribute", style={'text-align': 'center'}),
+    html.H3("Dataset Attribute", style={'text-align': 'center','color': '#21130d'}),
     html.Div([
-        dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size')),
-        dcc.Graph(id='file-type-histogram', figure=px.histogram(data_original, x='File Type', nbins=10, title='Distribution of File Type')),
-        dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy')),
-        dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Ransomware Count'))
+        dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])),
+        dcc.Graph(id='file-type-histogram', figure=px.histogram(data_original, x='File Type', nbins=10, title='Distribution of File Type', color_discrete_sequence=['#778da9'])),
+        dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy', color_discrete_sequence=['#778da9'])),
+        dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Ransomware Count', color_discrete_sequence=['#778da9']))
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
 ], style={'background-color': '#f0f0f0', 'padding': '20px'})
 
 # Adjust the size of each graph
-graph_style = {'width': '25%', 'height': '280'}
+graph_style = {'width': '25%', 'height': '400px'}
 
 # Apply the size to each graph
 for graph_id in ['file-size-histogram', 'file-type-histogram', 'entropy-histogram', 'ransomware-count']:
@@ -67,26 +67,26 @@ for graph_id in ['file-size-histogram', 'file-type-histogram', 'entropy-histogra
 
 # Define layout for machine learning training section
 machine_learning_training_layout = html.Div([
-    html.H2("Machine Learning Training", style={'text-align': 'center', 'margin-bottom': '20px'}),
+    html.H3("Machine Learning Training", style={'text-align': 'center', 'margin-bottom': '20px','color': '#21130d'}),
     html.Div([
         html.Div([
-            html.H4("KNN Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
-            html.P(f"KNN Accuracy: {knn_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
+            html.H4("kNN Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"kNN Accuracy: {knn_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
-            html.H4("Naive Bayes Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
-            html.P(f"Naive Bayes Accuracy: {nb_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
+            html.H4("Naive Bayes Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"Naive Bayes Accuracy: {nb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='nb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
-            html.H4("Gradient Boosting Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
-            html.P(f"Gradient Boosting Accuracy: {gb_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
+            html.H4("Gradient Boosting Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"Gradient Boosting Accuracy: {gb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
-            html.H4("Random Forest Training", style={'text-align': 'center', 'margin-bottom': '10px'}),
-            html.P(f"Random Forest Accuracy: {rf_accuracy * 100 :.2f}%", style={'text-align': 'center'}),
+            html.H4("Random Forest Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"Random Forest Accuracy: {rf_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
@@ -94,10 +94,19 @@ machine_learning_training_layout = html.Div([
 
 # Define layout for ransomware prediction section
 ransomware_prediction_layout = html.Div([
-    html.H2("Ransomware Prediction (Best Model)", style={'text-align': 'center', 'margin-bottom': '20px'}),
+    html.H3("Ransomware Prediction (Best Model)", style={'text-align': 'center', 'margin-bottom': '20px','color': '#21130d'}),
     html.Div([
-        dcc.Input(id='folder-path', type='text', placeholder='Folder path...', value='/Users/admin/11.SaskPoly/4.Innovation/4.test/misc', style={'width': '30%', 'margin-right': '10px'}),
-        html.Button('Predict', id='predict-button', n_clicks=0, style={'width': '15%'})
+        dcc.Dropdown(
+            id='folder-dropdown',
+            options=[
+                {'label': 'test/benign', 'value': '/Users/admin/11.SaskPoly/4.Innovation/4.test/benign'},
+                {'label': 'test/malware', 'value': '/Users/admin/11.SaskPoly/4.Innovation/4.test/malware'},
+                {'label': 'test/misc', 'value': '/Users/admin/11.SaskPoly/4.Innovation/4.test/misc'}
+            ],
+            value='/Users/admin/11.SaskPoly/4.Innovation/4.test/misc',
+            style={'width': '200px', 'margin-right': '10px'}
+        ),
+        html.Button('Predict', id='predict-button', n_clicks=0, style={'background-color': '#21130d', 'width': '100px', 'border': 'none', 'color': 'white',  'text-align': 'center', 'text-decoration': 'none', 'display': 'inline-block', 'cursor': 'pointer', 'border-radius': '4px'}),
     ], style={'display': 'flex', 'justify-content': 'center', 'margin-bottom': '20px'}),
     html.Div(id='prediction-output', style={'width': '80%', 'margin': 'auto', 'text-align': 'center'})
 ], style={'background-color': '#f0f0f0', 'padding': '20px'})
@@ -106,7 +115,7 @@ ransomware_prediction_layout = html.Div([
 @app.callback(
     Output('prediction-output', 'children'),
     [Input('predict-button', 'n_clicks')],
-    [State('folder-path', 'value')]
+    [State('folder-dropdown', 'value')]
 )
 def predict_ransomware(n_clicks, folder_path):
     if n_clicks == 0:
