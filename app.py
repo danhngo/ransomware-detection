@@ -99,11 +99,11 @@ ransomware_prediction_layout = html.Div([
         dcc.Dropdown(
             id='folder-dropdown',
             options=[
-                {'label': 'test/benign', 'value': '/Users/admin/11.SaskPoly/4.Innovation/4.test/benign'},
-                {'label': 'test/malware', 'value': '/Users/admin/11.SaskPoly/4.Innovation/4.test/malware'},
-                {'label': 'test/misc', 'value': '/Users/admin/11.SaskPoly/4.Innovation/4.test/misc'}
+                {'label': 'test/benign', 'value': '/Users/admin/11.SaskPoly/4.Innovation/test/benign'},
+                {'label': 'test/malware', 'value': '/Users/admin/11.SaskPoly/4.Innovation/test/malware'},
+                {'label': 'test/misc', 'value': '/Users/admin/11.SaskPoly/4.Innovation/test/misc'}
             ],
-            value='/Users/admin/11.SaskPoly/4.Innovation/4.test/misc',
+            value='/Users/admin/11.SaskPoly/4.Innovation/test/misc',
             style={'width': '200px', 'margin-right': '10px'}
         ),
         html.Button('Predict', id='predict-button', n_clicks=0, style={'background-color': '#21130d', 'width': '100px', 'border': 'none', 'color': 'white',  'text-align': 'center', 'text-decoration': 'none', 'display': 'inline-block', 'cursor': 'pointer', 'border-radius': '4px'}),
@@ -174,4 +174,4 @@ app.layout = html.Div([
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', debug=True)
