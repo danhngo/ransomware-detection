@@ -49,7 +49,7 @@ footer_layout = html.Footer([
 
 # Define layout for dataset attribute section
 data_training_layout = html.Div([
-    html.H3("Dataset Attribute", style={'text-align': 'center','color': '#21130d'}),
+    html.H3("Dataset Detail", style={'text-align': 'center','color': '#21130d'}),
     html.Div([
         dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='file-type-histogram', figure=px.histogram(data_original, x='File Type', nbins=10, title='Distribution of File Type', color_discrete_sequence=['#778da9'])),
@@ -70,23 +70,23 @@ machine_learning_training_layout = html.Div([
     html.H3("Machine Learning Training", style={'text-align': 'center', 'margin-bottom': '20px','color': '#21130d'}),
     html.Div([
         html.Div([
-            html.H4("kNN Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"kNN Accuracy: {knn_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"Accuracy: {knn_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
-            html.H4("Naive Bayes Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"Naive Bayes Accuracy: {nb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.H4("Naive Bayes", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"Accuracy: {nb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='nb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
-            html.H4("Gradient Boosting Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"Gradient Boosting Accuracy: {gb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"Accuracy: {gb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
-            html.H4("Random Forest Training", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"Random Forest Accuracy: {rf_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
+            html.P(f"Accuracy: {rf_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
         ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
@@ -94,7 +94,7 @@ machine_learning_training_layout = html.Div([
 
 # Define layout for ransomware prediction section
 ransomware_prediction_layout = html.Div([
-    html.H3("Ransomware Prediction (Best Model)", style={'text-align': 'center', 'margin-bottom': '20px','color': '#21130d'}),
+    html.H3("Ransomware Detection (Best Model)", style={'text-align': 'center', 'margin-bottom': '20px','color': '#21130d'}),
     html.Div([
         dcc.Dropdown(
             id='folder-dropdown',
