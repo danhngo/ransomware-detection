@@ -14,8 +14,13 @@ python3 cronjob.py
 
 # 4. Run App
 ssh docker@40.121.214.159 
+
+cd /home/docker/ransomware-detection-main
+
 nohup python3 app.py &
 http://40.121.214.159:8050/
 lsof -i tcp:8050
+https://coolors.co/palettes/trending
+
  
  

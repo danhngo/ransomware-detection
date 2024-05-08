@@ -52,17 +52,16 @@ data_training_layout = html.Div([
     html.H3("Dataset Detail", style={'text-align': 'center','color': '#21130d'}),
     html.Div([
         dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])),
-        dcc.Graph(id='file-type-histogram', figure=px.histogram(data_original, x='File Type', nbins=10, title='Distribution of File Type', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Ransomware Count', color_discrete_sequence=['#778da9']))
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
 ], style={'background-color': '#f0f0f0', 'padding': '20px'})
 
 # Adjust the size of each graph
-graph_style = {'width': '25%', 'height': '400px'}
+graph_style = {'width': '30%', 'height': '400px'}
 
 # Apply the size to each graph
-for graph_id in ['file-size-histogram', 'file-type-histogram', 'entropy-histogram', 'ransomware-count']:
+for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
     data_training_layout[graph_id].style = graph_style
 
 # Define layout for machine learning training section
@@ -73,22 +72,17 @@ machine_learning_training_layout = html.Div([
             html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
             html.P(f"Accuracy: {knn_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div([
-            html.H4("Naive Bayes", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"Accuracy: {nb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
-            dcc.Graph(id='nb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
             html.P(f"Accuracy: {gb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
             html.P(f"Accuracy: {rf_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
 ])
 
