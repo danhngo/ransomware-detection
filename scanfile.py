@@ -1,3 +1,4 @@
+ # Base file to scan files in a folder, calculate entropy, and write to a CSV file
 import os
 import math
 import hashlib
