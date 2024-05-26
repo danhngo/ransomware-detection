@@ -22,5 +22,8 @@ http://40.121.214.159:8050/
 lsof -i tcp:8050
 https://coolors.co/palettes/trending
 
+
+pip3 install opencv-python
+
  
  

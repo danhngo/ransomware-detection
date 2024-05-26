@@ -7,6 +7,11 @@ import ml as ml
 from sklearn.preprocessing import StandardScaler
 import scanfile as scan
 from dash.dependencies import Input, Output, State
+import datetime
+import plotly.graph_objs as go
+
+# Import the dashboard layout
+#from dashboard import dashboard_layout
 
 # Suppress warnings
 import warnings
@@ -17,6 +22,10 @@ warnings.filterwarnings("ignore", message="X does not have valid feature names, 
 # Load data
 data = pd.read_csv("data/pretrained_data.csv")
 data_original = data[data['File Size'] <= 50000000]
+
+# Define ransomware types
+ransomware_types = data['Ransomware Type'].dropna().unique()
+data['Date'] = pd.to_datetime(data['Date'])
 
 # Standardize data
 scaler = StandardScaler()
@@ -47,13 +56,30 @@ footer_layout = html.Footer([
     html.P("© 2024 Saskatchewan Polytechnic Applied Research", style={'text-align': 'center','color': '#21130d'})
 ])
 
-# Define layout for dataset attribute section
-data_training_layout = html.Div([
-    html.H3("Dataset Detail", style={'text-align': 'center','color': '#21130d'}),
+# Define combined layout for dataset attribute and machine learning training section
+data_and_ml_training_layout = html.Div([
+    html.H3("Dataset Detail and Machine Learning Training", style={'text-align': 'center', 'color': '#21130d'}),
     html.Div([
         dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Ransomware Count', color_discrete_sequence=['#778da9']))
+    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'}),
+    html.Div([
+        html.Div([
+            html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
+            dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
+        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        html.Div([
+            html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
+            dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
+        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        html.Div([
+            html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
+            dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
+        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
 ], style={'background-color': '#f0f0f0', 'padding': '20px'})
 
@@ -62,29 +88,7 @@ graph_style = {'width': '30%', 'height': '400px'}
 
 # Apply the size to each graph
 for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
-    data_training_layout[graph_id].style = graph_style
-
-# Define layout for machine learning training section
-machine_learning_training_layout = html.Div([
-    html.H3("Machine Learning Training", style={'text-align': 'center', 'margin-bottom': '20px','color': '#21130d'}),
-    html.Div([
-        html.Div([
-            html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"Accuracy: {knn_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
-            dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div([
-            html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"Accuracy: {gb_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
-            dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div([
-            html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px','color': '#21130d'}),
-            html.P(f"Accuracy: {rf_accuracy * 100 :.2f}%", style={'text-align': 'center','color': '#21130d'}),
-            dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
-])
+    data_and_ml_training_layout[graph_id].style = graph_style
 
 # Define layout for ransomware prediction section
 ransomware_prediction_layout = html.Div([
@@ -93,11 +97,11 @@ ransomware_prediction_layout = html.Div([
         dcc.Dropdown(
             id='folder-dropdown',
             options=[
-                {'label': 'test/benign', 'value': '/Users/admin/11.SaskPoly/4.Innovation/test/benign'},
-                {'label': 'test/malware', 'value': '/Users/admin/11.SaskPoly/4.Innovation/test/malware'},
-                {'label': 'test/misc', 'value': '/Users/admin/11.SaskPoly/4.Innovation/test/misc'}
+                {'label': 'test/benign', 'value': '/Users/admin/11.SaskPoly/4.capstone/test/benign'},
+                {'label': 'test/malware', 'value': '/Users/admin/11.SaskPoly/4.capstone/test/malware'},
+                {'label': 'test/misc', 'value': '/Users/admin/11.SaskPoly/4.capstone/test/misc'}
             ],
-            value='/Users/admin/11.SaskPoly/4.Innovation/test/misc',
+            value='/Users/admin/11.SaskPoly/4.capstone/test/misc',
             style={'width': '200px', 'margin-right': '10px'}
         ),
         html.Button('Predict', id='predict-button', n_clicks=0, style={'background-color': '#21130d', 'width': '100px', 'border': 'none', 'color': 'white',  'text-align': 'center', 'text-decoration': 'none', 'display': 'inline-block', 'cursor': 'pointer', 'border-radius': '4px'}),
@@ -157,15 +161,92 @@ def predict_ransomware(n_clicks, folder_path):
     except Exception as e:
         return html.Div(f'Error: {e}', style={'color': 'red'})
 
-# Combine header, content, and footer layouts
+# Define the layout for the Dashboard tab
+dashboard_layout = html.Div([
+    html.Div([
+        html.Label('Date Range Selection:'),
+        dcc.Dropdown(
+            id='date-range-dropdown',
+            options=[
+                {'label': 'Last Week', 'value': 'last_week'},
+                {'label': 'Last Month', 'value': 'last_month'},
+                {'label': 'Last Year', 'value': 'last_year'},
+                {'label': 'All', 'value': 'all'}
+            ],
+            value='last_month'
+        ),
+        html.Label('Ransomware Types:'),
+        dcc.Dropdown(
+            id='ransomware-dropdown',
+            options=[{'label': ransomware, 'value': ransomware} for ransomware in ransomware_types],
+            value=list(ransomware_types),
+            multi=True
+        )
+    ], style={'width': '30%', 'display': 'inline-block', 'padding': '20px'}),
+    html.Div([
+        dcc.Graph(id='ransomware-trend')
+    ], style={'width': '60%', 'display': 'inline-block', 'padding': '20px'})
+])
+
+
+# Define callback to update the trend graph based on filter selections
+@app.callback(
+    Output('ransomware-trend', 'figure'),
+    [Input('date-range-dropdown', 'value'),
+     Input('ransomware-dropdown', 'value')]
+)
+def update_ransomware_trend(date_range, selected_ransomware):
+    # Filter data based on date range selection
+    print("update_ransomware_trend")
+    if date_range == 'last_week':
+        start_date = datetime.datetime.now() - datetime.timedelta(days=7)
+    elif date_range == 'last_month':
+        start_date = datetime.datetime.now() - datetime.timedelta(days=30)
+    elif date_range == 'last_year':
+        start_date = datetime.datetime.now() - datetime.timedelta(days=365)
+    else:
+        start_date = datetime.datetime.min
+
+    filtered_data = data[data['Date'] >= start_date]
+
+    # Filter data based on selected ransomware types
+    filtered_data = filtered_data[filtered_data['Ransomware Type'].isin(selected_ransomware)]
+    print(f"Error Scanning files, calculating entropy and writing to csv: {filtered_data.count}")
+
+    # Group data by date and ransomware type
+    grouped_data = filtered_data.groupby(['Date', 'Ransomware Type']).size().reset_index(name='Count')
+
+    print(f"Error Scanning files, calculating entropy and writing to csv: {grouped_data.count}")
+
+    # Create traces for each ransomware type
+    traces = []
+    for ransomware in selected_ransomware:
+        ransomware_data = grouped_data[grouped_data['Ransomware Type'] == ransomware]
+        trace = go.Scatter(x=ransomware_data['Date'], y=ransomware_data['Count'], mode='lines+markers', name=ransomware)
+        traces.append(trace)
+
+    return {
+        'data': traces,
+        'layout': go.Layout(
+            title='Ransomware Trend',
+            xaxis={'title': 'Date'},
+            yaxis={'title': 'Count'},
+            hovermode='closest'
+        )
+    }
+
+# Define the layout with tabs
 app.layout = html.Div([
     header_layout,
-    data_training_layout,
-    machine_learning_training_layout,
-    ransomware_prediction_layout,
+    dcc.Tabs([
+        dcc.Tab(label='Data & ML Training', children=[data_and_ml_training_layout]),
+        dcc.Tab(label='Ransomware Prediction', children=[ransomware_prediction_layout]),
+         dcc.Tab(label='Dashboard', children=[dashboard_layout])
+    ]),
     footer_layout
 ])
 
+
 # Run the app
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', debug=True)
+    app.run_server(host='0.0.0.0', port=8060, debug=True)

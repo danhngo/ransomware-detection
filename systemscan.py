@@ -9,6 +9,12 @@ import pandas as pd
 import ml
 from sklearn.preprocessing import StandardScaler
 
+# Suppress warnings
+import warnings
+from sklearn.exceptions import UndefinedMetricWarning
+warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
+warnings.filterwarnings("ignore", message="X does not have valid feature names, but StandardScaler was fitted with feature names")
+
 # Define folder paths
 folder_path = "test/ransomware"
 output_folder = "data"
