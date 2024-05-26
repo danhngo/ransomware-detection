@@ -10,8 +10,6 @@ from dash.dependencies import Input, Output, State
 import datetime
 import plotly.graph_objs as go
 
-# Import the dashboard layout
-#from dashboard import dashboard_layout
 
 # Suppress warnings
 import warnings
@@ -42,7 +40,11 @@ rf_accuracy, _, _, rf_confmatrix = ml.rf_evaluate(x, y)
 gb_accuracy, _, _, gb_confmatrix = ml.gb_evaluate(x, y)
 
 # Create Dash app
-app = dash.Dash(__name__)
+#app = dash.Dash(__name__)
+
+# Create Dash app
+external_stylesheets = ['styles.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Define header layout
 header_layout = html.Header([
@@ -162,6 +164,7 @@ def predict_ransomware(n_clicks, folder_path):
         return html.Div(f'Error: {e}', style={'color': 'red'})
 
 # Define the layout for the Dashboard tab
+# Define the layout for the Dashboard tab
 dashboard_layout = html.Div([
     html.Div([
         html.Label('Date Range Selection:'),
@@ -173,31 +176,70 @@ dashboard_layout = html.Div([
                 {'label': 'Last Year', 'value': 'last_year'},
                 {'label': 'All', 'value': 'all'}
             ],
-            value='last_month'
+            value='last_month',
+            className="dcc_control",
         ),
         html.Label('Ransomware Types:'),
         dcc.Dropdown(
             id='ransomware-dropdown',
             options=[{'label': ransomware, 'value': ransomware} for ransomware in ransomware_types],
             value=list(ransomware_types),
+            className="dcc_control",
             multi=True
         )
-    ], style={'width': '30%', 'display': 'inline-block', 'padding': '20px'}),
+    ], className='pretty_container four columns'),
+    html.Div(
+        [
+            html.Div(
+                [
+                    html.Div(
+                        [html.H6(id="well_text"), html.P("No. of Ransomware")],
+                        id="ransomware_count",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(id="gasText"), html.P("Gas")],
+                        id="gas",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(id="oilText"), html.P("Oil")],
+                        id="oil",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(id="waterText"), html.P("Water")],
+                        id="water",
+                        className="mini_container",
+                    ),
+                ],
+                id="info-container",
+                className="row container-display",
+            ),
+            html.Div(
+                [dcc.Graph(id='ransomware-trend')],
+                id="countGraphContainer",
+                className="pretty_container",
+            ),
+
+        ],
+        id="right-column",
+    ),
     html.Div([
-        dcc.Graph(id='ransomware-trend')
-    ], style={'width': '60%', 'display': 'inline-block', 'padding': '20px'})
+        dcc.Graph(id='ransomware-pie-chart')
+    ], className='pretty_container four columns')
 ])
 
 
-# Define callback to update the trend graph based on filter selections
+# Define callback to update the trend graph and pie chart based on filter selections
 @app.callback(
-    Output('ransomware-trend', 'figure'),
+    [Output('ransomware-trend', 'figure'),
+     Output('ransomware-pie-chart', 'figure')],
     [Input('date-range-dropdown', 'value'),
      Input('ransomware-dropdown', 'value')]
 )
-def update_ransomware_trend(date_range, selected_ransomware):
+def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     # Filter data based on date range selection
-    print("update_ransomware_trend")
     if date_range == 'last_week':
         start_date = datetime.datetime.now() - datetime.timedelta(days=7)
     elif date_range == 'last_month':
@@ -211,21 +253,19 @@ def update_ransomware_trend(date_range, selected_ransomware):
 
     # Filter data based on selected ransomware types
     filtered_data = filtered_data[filtered_data['Ransomware Type'].isin(selected_ransomware)]
-    print(f"Error Scanning files, calculating entropy and writing to csv: {filtered_data.count}")
 
     # Group data by date and ransomware type
     grouped_data = filtered_data.groupby(['Date', 'Ransomware Type']).size().reset_index(name='Count')
 
-    print(f"Error Scanning files, calculating entropy and writing to csv: {grouped_data.count}")
-
-    # Create traces for each ransomware type
+    # Create traces for each ransomware type for the trend graph
     traces = []
     for ransomware in selected_ransomware:
         ransomware_data = grouped_data[grouped_data['Ransomware Type'] == ransomware]
         trace = go.Scatter(x=ransomware_data['Date'], y=ransomware_data['Count'], mode='lines+markers', name=ransomware)
         traces.append(trace)
 
-    return {
+    # Create the trend figure
+    trend_figure = {
         'data': traces,
         'layout': go.Layout(
             title='Ransomware Trend',
@@ -235,17 +275,25 @@ def update_ransomware_trend(date_range, selected_ransomware):
         )
     }
 
+    # Create the pie chart
+    ransomware_counts = filtered_data['Ransomware Type'].value_counts().reset_index()
+    ransomware_counts.columns = ['Ransomware Type', 'Count']
+    pie_figure = px.pie(ransomware_counts, values='Count', names='Ransomware Type', title='Ransomware Type Percentage')
+
+    return trend_figure, pie_figure
+
 # Define the layout with tabs
-app.layout = html.Div([
+app.layout = html.Div(
+    [
     header_layout,
     dcc.Tabs([
         dcc.Tab(label='Data & ML Training', children=[data_and_ml_training_layout]),
         dcc.Tab(label='Ransomware Prediction', children=[ransomware_prediction_layout]),
-         dcc.Tab(label='Dashboard', children=[dashboard_layout])
+        dcc.Tab(label='Dashboard', children=[dashboard_layout])
     ]),
     footer_layout
-])
-
+    ]   
+)
 
 # Run the app
 if __name__ == '__main__':
