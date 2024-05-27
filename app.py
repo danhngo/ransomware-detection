@@ -22,10 +22,11 @@ data = pd.read_csv("data/pretrained_data.csv")
 data_original = data[data['File Size'] <= 50000000]
 
 scan_data = pd.read_csv("predict/ransomware_detection.csv")
-
+scan_data['Date'] = pd.to_datetime(scan_data['Date'], format='mixed')
+# Filter scan_data to include only rows where Ransomware equals 1
+ransomware_data = scan_data[scan_data['Ransomware'] == 1]
 # Define ransomware types
-ransomware_types = scan_data['Ransomware Type'].dropna().unique()
-scan_data['Date'] = pd.to_datetime(scan_data['Date'])
+ransomware_types = ransomware_data['Ransomware Type'].dropna().unique()
 
 # Standardize data
 scaler = StandardScaler()
@@ -66,7 +67,7 @@ footer_layout = html.Footer(
 
 # Define combined layout for dataset attribute and machine learning training section
 data_and_ml_training_layout = html.Div([
-    html.H3("Dataset Detail and Machine Learning Training", style={'text-align': 'center', 'color': '#21130d'}),
+    html.H2("Dataset Detail and Machine Learning Training", style={'text-align': 'center', 'color': '#21130d'}),
     html.Div([
         dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy', color_discrete_sequence=['#778da9'])),
@@ -127,25 +128,26 @@ dashboard_layout = html.Div([
             html.Div(
                 [
                     html.Div(
-                        [html.H6(id="filesNoText"), html.P("No. of Scan Files")],
+                        [html.H6(id="dataCountText"), html.P("No. of Scan Files")],
                         id="scan_count",
                         className="mini_container",
                     ),
                     html.Div(
-                        [html.H6(id="ransomwareText"), html.P("No. of Ransomware")],
+                        [html.H6(id="ransomwareCountText"), html.P("No. of Ransomware")],
                         id="ransomware_count",
                         className="mini_container",
                     ),
                     html.Div(
-                        [html.H6(id="ransomwareTypeText"), html.P("No. of Ransomware Types")],
-                        id="ransomwareType_count",
+                        [html.H6(id="ransomwarePercentText"), html.P("Ransomware Percent")],
+                        id="ransomware_percent",
                         className="mini_container",
                     ),
                     html.Div(
-                        [html.H6(id="waterText"), html.P("Water")],
-                        id="water",
+                        [html.H6(id="ransomwareTypeCountText"), html.P("Ransomware Types")],
+                        id="ransomwareType_count",
                         className="mini_container",
                     ),
+                    
                 ],
                 id="info-container",
                 className="row container-display",
@@ -154,21 +156,26 @@ dashboard_layout = html.Div([
                 [dcc.Graph(id='ransomware-trend')],
                 id="countGraphContainer",
                 className="pretty_container",
-            ),
-
+            )
         ],
         id="right-column",
     ),
-    html.Div([
-        dcc.Graph(id='ransomware-pie-chart')
-    ], className='pretty_container four columns')
+    html.Div(
+        [dcc.Graph(id='ransomware-pie-chart')],
+        id="countGraphContainer2",
+        className="pretty_container",
+    )
 ])
 
 
 # Define callback to update the trend graph and pie chart based on filter selections
 @app.callback(
     [Output('ransomware-trend', 'figure'),
-     Output('ransomware-pie-chart', 'figure')],
+     Output('ransomware-pie-chart', 'figure'),
+     Output('dataCountText', 'children'),
+     Output('ransomwareCountText', 'children'),
+     Output('ransomwarePercentText', 'children'),
+     Output('ransomwareTypeCountText', 'children')],
     [Input('date-range-dropdown', 'value'),
      Input('ransomware-dropdown', 'value')]
 )
@@ -183,7 +190,8 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     else:
         start_date = datetime.datetime.min
 
-    filtered_data = scan_data[scan_data['Date'] >= start_date]
+    total_data = scan_data[scan_data['Date'] >= start_date]
+    filtered_data = ransomware_data[ransomware_data['Date'] >= start_date]
 
     # Filter data based on selected ransomware types
     filtered_data = filtered_data[filtered_data['Ransomware Type'].isin(selected_ransomware)]
@@ -194,8 +202,8 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     # Create traces for each ransomware type for the trend graph
     traces = []
     for ransomware in selected_ransomware:
-        ransomware_data = grouped_data[grouped_data['Ransomware Type'] == ransomware]
-        trace = go.Scatter(x=ransomware_data['Date'], y=ransomware_data['Count'], mode='lines+markers', name=ransomware)
+        ransomwareType_data = grouped_data[grouped_data['Ransomware Type'] == ransomware]
+        trace = go.Scatter(x=ransomwareType_data['Date'], y=ransomwareType_data['Count'], mode='lines+markers', name=ransomware)
         traces.append(trace)
 
     # Create the trend figure
@@ -214,7 +222,13 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     ransomware_counts.columns = ['Ransomware Type', 'Count']
     pie_figure = px.pie(ransomware_counts, values='Count', names='Ransomware Type', title='Ransomware Type Percentage')
 
-    return trend_figure, pie_figure
+    # Calculate counts
+    data_count = len(total_data)
+    ransomware_count = filtered_data['Ransomware'].sum()
+    ransomware_percent = '{1:.{0}f}%'.format(1, (ransomware_count / data_count * 100) / 10 ** 1) 
+    ransomware_types_count = len(filtered_data['Ransomware Type'].unique())
+
+    return trend_figure, pie_figure,data_count,ransomware_count,ransomware_percent,ransomware_types_count
 
 # Define the layout with tabs
 # Define the layout
