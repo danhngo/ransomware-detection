@@ -21,9 +21,11 @@ warnings.filterwarnings("ignore", message="X does not have valid feature names, 
 data = pd.read_csv("data/pretrained_data.csv")
 data_original = data[data['File Size'] <= 50000000]
 
+scan_data = pd.read_csv("predict/ransomware_detection.csv")
+
 # Define ransomware types
-ransomware_types = data['Ransomware Type'].dropna().unique()
-data['Date'] = pd.to_datetime(data['Date'])
+ransomware_types = scan_data['Ransomware Type'].dropna().unique()
+scan_data['Date'] = pd.to_datetime(scan_data['Date'])
 
 # Standardize data
 scaler = StandardScaler()
@@ -47,16 +49,20 @@ external_stylesheets = ['styles.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Define header layout
-header_layout = html.Header([
-    html.H1("AI-powered Ransomware Detection System", style={'text-align': 'center','color': '#21130d'}),
-    html.Hr()
-])
+header_layout = html.Header(
+    className='header',
+    children=[
+        html.H1("AI-powered Ransomware Detection System")
+    ]
+)
 
 # Define footer layout
-footer_layout = html.Footer([
-    html.Hr(),
-    html.P("© 2024 Saskatchewan Polytechnic Applied Research", style={'text-align': 'center','color': '#21130d'})
-])
+footer_layout = html.Footer(
+    className='footer',
+    children=[
+        html.P("© 2024 Saskatchewan Polytechnic")
+    ]
+)
 
 # Define combined layout for dataset attribute and machine learning training section
 data_and_ml_training_layout = html.Div([
@@ -92,78 +98,6 @@ graph_style = {'width': '30%', 'height': '400px'}
 for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
     data_and_ml_training_layout[graph_id].style = graph_style
 
-# Define layout for ransomware prediction section
-ransomware_prediction_layout = html.Div([
-    html.H3("Ransomware Detection (Best Model)", style={'text-align': 'center', 'margin-bottom': '20px','color': '#21130d'}),
-    html.Div([
-        dcc.Dropdown(
-            id='folder-dropdown',
-            options=[
-                {'label': 'test/benign', 'value': '/Users/admin/11.SaskPoly/4.capstone/test/benign'},
-                {'label': 'test/malware', 'value': '/Users/admin/11.SaskPoly/4.capstone/test/malware'},
-                {'label': 'test/misc', 'value': '/Users/admin/11.SaskPoly/4.capstone/test/misc'}
-            ],
-            value='/Users/admin/11.SaskPoly/4.capstone/test/misc',
-            style={'width': '200px', 'margin-right': '10px'}
-        ),
-        html.Button('Predict', id='predict-button', n_clicks=0, style={'background-color': '#21130d', 'width': '100px', 'border': 'none', 'color': 'white',  'text-align': 'center', 'text-decoration': 'none', 'display': 'inline-block', 'cursor': 'pointer', 'border-radius': '4px'}),
-    ], style={'display': 'flex', 'justify-content': 'center', 'margin-bottom': '20px'}),
-    html.Div(id='prediction-output', style={'width': '80%', 'margin': 'auto', 'text-align': 'center'})
-], style={'background-color': '#f0f0f0', 'padding': '20px'})
-
-# Callback to handle predicting ransomware for files in the specified folder
-@app.callback(
-    Output('prediction-output', 'children'),
-    [Input('predict-button', 'n_clicks')],
-    [State('folder-dropdown', 'value')]
-)
-def predict_ransomware(n_clicks, folder_path):
-    if n_clicks == 0:
-        raise dash.exceptions.PreventUpdate
-
-    try:
-        # Calculate file size, entropy, and write to CSV
-        scan.scan_file_csv(folder_path)
-
-        # Load the data from files_scan.csv
-        new_data = pd.read_csv("predict/files_scan.csv")
-
-        # Use the existing scaler instance fitted on the training data to scale the new data
-        new_data_transformed = scaler.transform(new_data[['File Size', 'Entropy']])
-
-        # Make predictions using Random Forest model
-        bestAccuracy = max(rf_accuracy, knn_accuracy, nb_accuracy)
-        if bestAccuracy == rf_accuracy:
-            predictions = ml.rf_predict(x, y, new_data_transformed)
-        elif bestAccuracy == knn_accuracy:
-            predictions = ml.knn_predict(x, y, new_data_transformed)
-        else:
-            predictions = ml.nb_predict(x, y, new_data_transformed)
-
-        # Write the results back to the CSV file
-        new_data['Ransomware'] = predictions
-        new_data.to_csv("predict/ransomware_predicted.csv", index=False)
-
-        # Read the predicted data
-        predicted_data = pd.read_csv("predict/ransomware_predicted.csv")
-
-        table = dash_table.DataTable(
-            id='data-table',
-            columns=[{'name': col, 'id': col} for col in predicted_data.columns],
-            data=predicted_data.to_dict('records'),
-            style_table={'overflowX': 'auto'},  # Horizontal scroll
-            style_cell={'textAlign': 'left'},
-            style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'},
-            style_data_conditional=[
-                {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'},
-                {'if': {'filter_query': '{Ransomware} = 1'}, 'color': 'red', 'fontWeight': 'bold'}
-            ]
-        )
-        return table
-    except Exception as e:
-        return html.Div(f'Error: {e}', style={'color': 'red'})
-
-# Define the layout for the Dashboard tab
 # Define the layout for the Dashboard tab
 dashboard_layout = html.Div([
     html.Div([
@@ -193,18 +127,18 @@ dashboard_layout = html.Div([
             html.Div(
                 [
                     html.Div(
-                        [html.H6(id="well_text"), html.P("No. of Ransomware")],
+                        [html.H6(id="filesNoText"), html.P("No. of Scan Files")],
+                        id="scan_count",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(id="ransomwareText"), html.P("No. of Ransomware")],
                         id="ransomware_count",
                         className="mini_container",
                     ),
                     html.Div(
-                        [html.H6(id="gasText"), html.P("Gas")],
-                        id="gas",
-                        className="mini_container",
-                    ),
-                    html.Div(
-                        [html.H6(id="oilText"), html.P("Oil")],
-                        id="oil",
+                        [html.H6(id="ransomwareTypeText"), html.P("No. of Ransomware Types")],
+                        id="ransomwareType_count",
                         className="mini_container",
                     ),
                     html.Div(
@@ -249,7 +183,7 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     else:
         start_date = datetime.datetime.min
 
-    filtered_data = data[data['Date'] >= start_date]
+    filtered_data = scan_data[scan_data['Date'] >= start_date]
 
     # Filter data based on selected ransomware types
     filtered_data = filtered_data[filtered_data['Ransomware Type'].isin(selected_ransomware)]
@@ -283,16 +217,25 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     return trend_figure, pie_figure
 
 # Define the layout with tabs
+# Define the layout
 app.layout = html.Div(
     [
-    header_layout,
-    dcc.Tabs([
-        dcc.Tab(label='Data & ML Training', children=[data_and_ml_training_layout]),
-        dcc.Tab(label='Ransomware Prediction', children=[ransomware_prediction_layout]),
-        dcc.Tab(label='Dashboard', children=[dashboard_layout])
-    ]),
-    footer_layout
-    ]   
+        header_layout,
+        html.Div(
+            className="tab-container",
+            children=[
+                dcc.Tabs(
+                    id="tabs",
+                    value="tab-1",
+                    children=[
+                        dcc.Tab(label='Data & ML Training', children=[data_and_ml_training_layout], className="tab-style", selected_className="tab-style--selected"),
+                        dcc.Tab(label='Ransomware Dashboard', children=[dashboard_layout], className="tab-style", selected_className="tab-style--selected")
+                    ]
+                )
+            ]
+        ),
+        footer_layout
+    ]
 )
 
 # Run the app

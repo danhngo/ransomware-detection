@@ -5,7 +5,6 @@
 
 body {
   background-color: #f2f2f2;
-  margin: 5%;
 }
 
 .two.columns {
@@ -317,20 +316,20 @@ h6 {
   font-weight: 300;
 }
 h1 {
-  font-size: 4.5rem;
+  font-size: 3.6rem;
   line-height: 1.2;
   letter-spacing: -0.1rem;
   margin-bottom: 2rem;
 }
 h2 {
-  font-size: 3.6rem;
+  font-size: 3rem;
   line-height: 1.25;
   letter-spacing: -0.1rem;
   margin-bottom: 1.8rem;
   margin-top: 1.8rem;
 }
 h3 {
-  font-size: 3rem;
+  font-size: 2.8rem;
   line-height: 1.3;
   letter-spacing: -0.1rem;
   margin-bottom: 1.5rem;
@@ -735,4 +734,54 @@ there.
 
 /* Larger than Desktop HD */
 @media (min-width: 1200px) {
+}
+
+
+/* styles.css */
+
+/* Style for the entire tabs container */
+.tab-container {
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 2px lightgrey;
+  margin: 10px;
+  padding: 15px;
+}
+
+/* Style for each tab */
+.tab-style {
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Style for active tab */
+.tab-style--selected {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Hover effect for tabs */
+.tab-style:hover {
+  background-color: #d0d0d0;
+}
+
+/* Header style */
+.header {
+  text-align: center;
+  color: #21130d;
+  padding: 20px 0;
+  background-color: #f0f0f0;
+}
+
+/* Footer style */
+.footer {
+  text-align: center;
+  color: #21130d;
+  padding: 10px 0;
+  background-color: #f0f0f0;
 }
