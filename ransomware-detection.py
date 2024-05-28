@@ -96,7 +96,7 @@ def ransomware_detection():
     # Load data
     x = data[['File Size', 'Entropy']]
     y = data['Ransomware']
-    rf_accuracy, _, _, _ = ml.rf_evaluate(x, y)
+    rf_accuracy, _, _, _,_,_ = ml.rf_evaluate(x, y)
     print(f"Model evaluated, accuracy: {rf_accuracy}")
     print("Starting ransomware prediction...")
   

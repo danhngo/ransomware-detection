@@ -28,7 +28,11 @@ def knn_evaluate(x, y):
     f1 = f1_score(y_test, y_pred, zero_division=1)
     conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
 
-    return accuracy, report, f1, conf_matrix
+     # Get the total number of training and test files
+    total_train_files = len(x_train)
+    total_test_files = len(x_test)
+
+    return accuracy, report, f1, conf_matrix,total_train_files,total_test_files
 
 def nb_evaluate(x, y):
     # Splitting the dataset into the Training set and Test set
@@ -52,7 +56,11 @@ def nb_evaluate(x, y):
     f1 = f1_score(y_test, y_pred, zero_division=1)
     conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
 
-    return accuracy, report, f1, conf_matrix
+     # Get the total number of training and test files
+    total_train_files = len(x_train)
+    total_test_files = len(x_test)
+
+    return accuracy, report, f1, conf_matrix,total_train_files,total_test_files
 
 def rf_evaluate(x, y):
     # Splitting the dataset into the Training set and Test set
@@ -76,7 +84,39 @@ def rf_evaluate(x, y):
     f1 = f1_score(y_test, y_pred, zero_division=1)
     conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
 
-    return accuracy, report, f1, conf_matrix
+     # Get the total number of training and test files
+    total_train_files = len(x_train)
+    total_test_files = len(x_test)
+
+    return accuracy, report, f1, conf_matrix,total_train_files,total_test_files
+
+def gb_evaluate(x, y):
+    # Splitting the dataset into the Training set and Test set
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=2)
+
+    # Feature Scaling
+    sc = StandardScaler()
+    x_train = sc.fit_transform(x_train)
+    x_test = sc.transform(x_test)
+
+    # Train the Gradient Boosting model
+    gb_classifier = GradientBoostingClassifier()
+    gb_classifier.fit(x_train, y_train)
+
+    # Predicting the Test set results
+    y_pred = gb_classifier.predict(x_test)
+
+    # Model evaluation
+    accuracy = accuracy_score(y_pred, y_test)
+    report = classification_report(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, zero_division=1)
+    conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
+
+     # Get the total number of training and test files
+    total_train_files = len(x_train)
+    total_test_files = len(x_test)
+
+    return accuracy, report, f1, conf_matrix,total_train_files,total_test_files
 
 def knn_predict(x_train, y_train, new_data):
     # Feature Scaling
@@ -123,30 +163,6 @@ def rf_predict(x_train, y_train, new_data):
     rf_predictions = rf_classifier.predict(new_data)
     
     return rf_predictions
-    
-def gb_evaluate(x, y):
-    # Splitting the dataset into the Training set and Test set
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=2)
-
-    # Feature Scaling
-    sc = StandardScaler()
-    x_train = sc.fit_transform(x_train)
-    x_test = sc.transform(x_test)
-
-    # Train the Gradient Boosting model
-    gb_classifier = GradientBoostingClassifier()
-    gb_classifier.fit(x_train, y_train)
-
-    # Predicting the Test set results
-    y_pred = gb_classifier.predict(x_test)
-
-    # Model evaluation
-    accuracy = accuracy_score(y_pred, y_test)
-    report = classification_report(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, zero_division=1)
-    conf_matrix = confusion_matrix(y_true=y_test, y_pred=y_pred)
-
-    return accuracy, report, f1, conf_matrix
 
 def gb_predict(x_train, y_train, new_data):
     # Feature Scaling

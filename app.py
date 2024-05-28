@@ -23,10 +23,11 @@ data_original = data[data['File Size'] <= 50000000]
 
 scan_data = pd.read_csv("predict/ransomware_detection.csv")
 scan_data['Date'] = pd.to_datetime(scan_data['Date'], format='mixed')
-# Filter scan_data to include only rows where Ransomware equals 1
-ransomware_data = scan_data[scan_data['Ransomware'] == 1]
-# Define ransomware types
+
+# Filter scan_data
+ransomware_data = scan_data[(scan_data['Ransomware'] == 1) & (scan_data['Ransomware Type'] != 'unknow')]
 ransomware_types = ransomware_data['Ransomware Type'].dropna().unique()
+
 
 # Standardize data
 scaler = StandardScaler()
@@ -37,10 +38,26 @@ x = data[['File Size', 'Entropy']]
 y = data['Ransomware']
 
 # Run classifiers
-knn_accuracy, _, _, knn_confmatrix = ml.knn_evaluate(x, y)
-nb_accuracy, _, _, nb_confmatrix = ml.nb_evaluate(x, y)
-rf_accuracy, _, _, rf_confmatrix = ml.rf_evaluate(x, y)
-gb_accuracy, _, _, gb_confmatrix = ml.gb_evaluate(x, y)
+knn_accuracy, _, _, knn_confmatrix, knn_total_train_files, knn_total_test_files = ml.knn_evaluate(x, y)
+nb_accuracy, _, _, nb_confmatrix, nb_total_train_files, nb_total_test_files = ml.nb_evaluate(x, y)
+rf_accuracy, _, _, rf_confmatrix, rf_total_train_files, rf_total_test_files = ml.rf_evaluate(x, y)
+gb_accuracy, _, _, gb_confmatrix, gb_total_train_files, gb_total_test_files = ml.gb_evaluate(x, y)
+
+# Create the bar chart
+bar_chart = go.Figure(data=[
+    go.Bar(name='Training Files', x=['kNN', 'NB', 'RF', 'GB'],
+           y=[knn_total_train_files, nb_total_train_files, rf_total_train_files, gb_total_train_files], marker_color='#778da9'),
+    go.Bar(name='Test Files', x=['kNN', 'NB', 'RF', 'GB'],
+           y=[knn_total_test_files, nb_total_test_files, rf_total_test_files, gb_total_test_files], marker_color='#154c79')
+])
+
+# Update the layout
+bar_chart.update_layout(
+    title='Training vs Test Files',
+    xaxis_title='Model',
+    yaxis_title='Number of Files',
+    barmode='group'
+)
 
 # Create Dash app
 #app = dash.Dash(__name__)
@@ -71,33 +88,41 @@ data_and_ml_training_layout = html.Div([
     html.Div([
         dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy', color_discrete_sequence=['#778da9'])),
-        dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Ransomware Count', color_discrete_sequence=['#778da9']))
+        dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Ransomware Count', color_discrete_sequence=['#778da9'])),
+        dcc.Graph(id='training-test-files-bar-chart', figure=bar_chart)
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'}),
     html.Div([
         html.Div([
             html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
             html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
             dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        html.Div([
+            html.H4("Native Bayes", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.P(f"Accuracy: {nb_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
+            dcc.Graph(id='nb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
             html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
-            dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+            dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=gb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
             html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
             dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'})
-], style={'background-color': '#f0f0f0', 'padding': '20px'})
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
+    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap','padding-top':'40px', 'margin': '20px'})
+])
 
 # Adjust the size of each graph
-graph_style = {'width': '30%', 'height': '400px'}
+graph_style = {'width': '25%', 'height': '400px'}
 
 # Apply the size to each graph
-for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
+for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count','training-test-files-bar-chart']:
     data_and_ml_training_layout[graph_id].style = graph_style
+
+
 
 # Define the layout for the Dashboard tab
 dashboard_layout = html.Div([
@@ -153,7 +178,7 @@ dashboard_layout = html.Div([
                 className="row container-display",
             ),
             html.Div(
-                [dcc.Graph(id='ransomware-trend')],
+                [dcc.Graph(id='ransomware-trend', style={'height': '380px'})],
                 id="countGraphContainer",
                 className="pretty_container",
             )
@@ -161,10 +186,19 @@ dashboard_layout = html.Div([
         id="right-column",
     ),
     html.Div(
-        [dcc.Graph(id='ransomware-pie-chart')],
-        id="countGraphContainer2",
-        className="pretty_container",
+        [
+            html.Div(
+                [dcc.Graph(id="ransomware-bar-chart")],
+                className="pretty_container six columns",
+            ),
+            html.Div(
+                [dcc.Graph(id="ransomware-pie-chart")],
+                className="pretty_container six columns",
+            ),
+        ],
+        className="row flex-display",
     )
+    
 ])
 
 
@@ -172,6 +206,7 @@ dashboard_layout = html.Div([
 @app.callback(
     [Output('ransomware-trend', 'figure'),
      Output('ransomware-pie-chart', 'figure'),
+     Output('ransomware-bar-chart', 'figure'),
      Output('dataCountText', 'children'),
      Output('ransomwareCountText', 'children'),
      Output('ransomwarePercentText', 'children'),
@@ -202,8 +237,14 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     # Create traces for each ransomware type for the trend graph
     traces = []
     for ransomware in selected_ransomware:
-        ransomwareType_data = grouped_data[grouped_data['Ransomware Type'] == ransomware]
-        trace = go.Scatter(x=ransomwareType_data['Date'], y=ransomwareType_data['Count'], mode='lines+markers', name=ransomware)
+        ransomware_trend_data = grouped_data[grouped_data['Ransomware Type'] == ransomware]
+        trace = go.Scatter(
+            x=ransomware_trend_data['Date'],
+            y=ransomware_trend_data['Count'],
+            mode='lines',
+            name=ransomware,
+            line_shape='spline'  # Use 'spline' for smoothing
+        )
         traces.append(trace)
 
     # Create the trend figure
@@ -220,15 +261,38 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     # Create the pie chart
     ransomware_counts = filtered_data['Ransomware Type'].value_counts().reset_index()
     ransomware_counts.columns = ['Ransomware Type', 'Count']
-    pie_figure = px.pie(ransomware_counts, values='Count', names='Ransomware Type', title='Ransomware Type Percentage')
+    pie_figure = px.pie(ransomware_counts, values='Count', names='Ransomware Type', title='Ransomware Types')
 
+    
     # Calculate counts
     data_count = len(total_data)
     ransomware_count = filtered_data['Ransomware'].sum()
     ransomware_percent = '{1:.{0}f}%'.format(1, (ransomware_count / data_count * 100) / 10 ** 1) 
     ransomware_types_count = len(filtered_data['Ransomware Type'].unique())
 
-    return trend_figure, pie_figure,data_count,ransomware_count,ransomware_percent,ransomware_types_count
+   
+    # Create the bar chart
+    ransomware_type_counts = filtered_data['Ransomware Type'].value_counts().reset_index()
+    ransomware_type_counts.columns = ['Ransomware Type', 'Count']
+
+    bar_data = [
+        go.Bar(name='Total Scan Files', x=['Total Scan Files'], y=[data_count])
+    ]
+
+    for index, row in ransomware_type_counts.iterrows():
+        bar_data.append(go.Bar(name=row['Ransomware Type'], x=[row['Ransomware Type']], y=[row['Count']]))
+
+    bar_figure = {
+        'data': bar_data,
+        'layout': go.Layout(
+            title='Total Scan Files and Ransomware Counts',
+            xaxis={'title': 'No. of Files'},
+            yaxis={'title': 'Count'},
+            barmode='group'
+        )
+    }
+
+    return trend_figure, pie_figure,bar_figure, data_count,ransomware_count,ransomware_percent,ransomware_types_count
 
 # Define the layout with tabs
 # Define the layout
