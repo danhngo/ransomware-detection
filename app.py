@@ -9,6 +9,7 @@ import scanfile as scan
 from dash.dependencies import Input, Output, State
 import datetime
 import plotly.graph_objs as go
+import time  # Import the time module
 
 
 # Suppress warnings
@@ -102,7 +103,7 @@ data_and_ml_training_layout = html.Div([
                         className="mini_container",
                     ),
                 ],
-                id="info-container",
+                id="info-container-2",
                 className="row container-display",
             ),
         ],
@@ -121,10 +122,19 @@ data_and_ml_training_layout = html.Div([
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap','padding-top':'20px', 'margin': '20px'}),
 
     html.Div([
-        html.Div(id='rf-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div(id='knn-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div(id='gb-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap','padding-top':'20px', 'margin': '20px'})
+        dcc.Loading(
+            id="loading-training-results",
+            type="default",
+            children=[
+                html.Div([
+                    html.Div(id='rf-training-results', style={'width': '33%', 'display': 'inline-block', 'vertical-align': 'top'}),
+                    html.Div(id='knn-training-results', style={'width': '33%', 'display': 'inline-block', 'vertical-align': 'top'}),
+                    html.Div(id='gb-training-results', style={'width': '33%', 'display': 'inline-block', 'vertical-align': 'top'}),
+                ])
+            ]
+        ),
+    ], style={'justify-content': 'space-around', 'flex-wrap': 'wrap','margin-left': '45px','margin-right': '45px'})
+
 ])
 
 # Adjust the size of each graph
@@ -142,6 +152,9 @@ for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']
 )
 def machine_learning_train(n_clicks):
     if n_clicks > 0:
+        # Add a delay of 2 seconds
+        time.sleep(2)
+
         # Train the Random Forest model
         rf_accuracy, rf_report, rf_f1, rf_confmatrix, rf_total_train_files, rf_total_test_files = ml.rf_evaluate(x, y)
         # Train the KNN model
@@ -401,4 +414,4 @@ app.layout = html.Div(
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8060)
+    app.run_server(host='0.0.0.0', port=8060, debug=True)
