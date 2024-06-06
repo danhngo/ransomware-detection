@@ -20,7 +20,13 @@ warnings.filterwarnings("ignore", message="X does not have valid feature names, 
 # Load data
 data = pd.read_csv("data/pretrained_data.csv")
 data_original = data[data['File Size'] <= 50000000]
-
+train_count = len(data_original)
+benign_count = len(data_original[data_original['Ransomware'] == 0])
+ransomware_count = len(data_original[data_original['Ransomware'] == 1])
+ransomware_percent = ransomware_count / train_count * 100
+entropy_mean = data_original['Entropy'].mean()    
+file_size_mean = data_original['File Size'].mean() / 1000000
+  
 scan_data = pd.read_csv("predict/ransomware_detection.csv")
 scan_data['Date'] = pd.to_datetime(scan_data['Date'], format='mixed')
 
@@ -42,25 +48,6 @@ knn_accuracy, _, _, knn_confmatrix, knn_total_train_files, knn_total_test_files 
 nb_accuracy, _, _, nb_confmatrix, nb_total_train_files, nb_total_test_files = ml.nb_evaluate(x, y)
 rf_accuracy, _, _, rf_confmatrix, rf_total_train_files, rf_total_test_files = ml.rf_evaluate(x, y)
 gb_accuracy, _, _, gb_confmatrix, gb_total_train_files, gb_total_test_files = ml.gb_evaluate(x, y)
-
-# Create the bar chart
-bar_chart = go.Figure(data=[
-    go.Bar(name='Training Files', x=['kNN', 'NB', 'RF', 'GB'],
-           y=[knn_total_train_files, nb_total_train_files, rf_total_train_files, gb_total_train_files], marker_color='#778da9'),
-    go.Bar(name='Test Files', x=['kNN', 'NB', 'RF', 'GB'],
-           y=[knn_total_test_files, nb_total_test_files, rf_total_test_files, gb_total_test_files], marker_color='#154c79')
-])
-
-# Update the layout
-bar_chart.update_layout(
-    title='Training vs Test Files',
-    xaxis_title='Model',
-    yaxis_title='Number of Files',
-    barmode='group'
-)
-
-# Create Dash app
-#app = dash.Dash(__name__)
 
 # Create Dash app
 external_stylesheets = ['styles.css']
@@ -84,44 +71,134 @@ footer_layout = html.Footer(
 
 # Define combined layout for dataset attribute and machine learning training section
 data_and_ml_training_layout = html.Div([
-    html.H2("Dataset Detail and Machine Learning Training", style={'text-align': 'center', 'color': '#21130d'}),
+
+    html.Div(
+        [
+            html.Div(
+                [
+                    html.Div(
+                        [html.H6(f"{train_count}"), html.P("No. of Files")],
+                        id="trained_count",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(f"{benign_count}"), html.P("No. of Benign Files")],
+                        id="benign_count",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(f"{ransomware_count}"), html.P("No. of Ransomware Files")],
+                        id="trained_ransomware_count",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(f"{entropy_mean:.2f}"), html.P("Entropy Mean")],
+                        id="entropy_count",
+                        className="mini_container",
+                    ),
+                    html.Div(
+                        [html.H6(f"{file_size_mean:.2f} M"), html.P("File Size Mean")],
+                        id="file_size_count",
+                        className="mini_container",
+                    ),
+                ],
+                id="info-container",
+                className="row container-display",
+            ),
+        ],
+    ),
+   
     html.Div([
-        dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])),
+        dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Benign vs. Ransomware', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy', color_discrete_sequence=['#778da9'])),
-        dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Ransomware Count', color_discrete_sequence=['#778da9'])),
-        dcc.Graph(id='training-test-files-bar-chart', figure=bar_chart)
+        dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])), 
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'}),
+    
     html.Div([
-        html.Div([
-            html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
-            dcc.Graph(id='knn_confusionmatrix', figure=ff.create_annotated_heatmap(z=knn_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div([
-            html.H4("Native Bayes", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Accuracy: {nb_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
-            dcc.Graph(id='nb_confusionmatrix', figure=ff.create_annotated_heatmap(z=nb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div([
-            html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
-            dcc.Graph(id='gb_confusionmatrix', figure=ff.create_annotated_heatmap(z=gb_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
-        html.Div([
-            html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'text-align': 'center', 'color': '#21130d'}),
-            dcc.Graph(id='rf_confusionmatrix', figure=ff.create_annotated_heatmap(z=rf_confmatrix, x=['0', '1'], y=['0', '1'], colorscale='teal', reversescale=False), config={'displayModeBar': False})
-        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}),
-    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap','padding-top':'40px', 'margin': '20px'})
+         html.Div([
+            html.Button('Machine Learning Training', id='train-button', n_clicks=0),
+            html.Div(id='rf-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+            html.Div(id='knn-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+            html.Div(id='gb-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'})
+        ], style={'text-align': 'center', 'margin': '20px'}),
+    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap','padding-top':'20px', 'margin': '20px'})
 ])
 
+@app.callback(
+    [Output('rf-training-results', 'children'),
+    Output('knn-training-results', 'children'),
+    Output('gb-training-results', 'children')],
+    [Input('train-button', 'n_clicks')]
+)
+def machine_learning_train(n_clicks):
+    if n_clicks > 0:
+        # Train the Random Forest model
+        rf_accuracy, rf_report, rf_f1, rf_confmatrix, rf_total_train_files, rf_total_test_files = ml.rf_evaluate(x, y)
+        # Train the KNN model
+        knn_accuracy, knn_report, knn_f1, knn_confmatrix, knn_total_train_files, knn_total_test_files = ml.knn_evaluate(x, y)
+        # Train the Gradient Boosting model
+        gb_accuracy, gb_report, gb_f1, gb_confmatrix, gb_total_train_files, gb_total_test_files = ml.gb_evaluate(x, y)
+        
+        # Create the confusion matrix heatmap
+        rf_conf_matrix_fig = ff.create_annotated_heatmap(
+            z=rf_confmatrix,
+            x=['0', '1'],
+            y=['0', '1'],
+            colorscale='teal',
+            reversescale=False
+        )
+
+        knn_conf_matrix_fig = ff.create_annotated_heatmap(
+            z=knn_confmatrix,
+            x=['0', '1'],
+            y=['0', '1'],
+            colorscale='teal',
+            reversescale=False
+        )
+
+        gb_conf_matrix_fig = ff.create_annotated_heatmap(
+            z=gb_confmatrix,
+            x=['0', '1'],
+            y=['0', '1'],
+            colorscale='teal',
+            reversescale=False
+        )
+
+        # Create a summary of results
+        rf_results = html.Div([
+            html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.P(f"Test/Training: {(rf_total_test_files/rf_total_train_files) * 100:.2f}%", style={'color': '#21130d'}),
+            html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'color': '#21130d'}),
+            html.P(f"F1 Score: {rf_f1:.2f}", style={'color': '#21130d'}),
+            dcc.Graph(figure=rf_conf_matrix_fig)
+        ])
+
+        knn_results = html.Div([
+            html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.P(f"Test/Training: {(knn_total_test_files/knn_total_train_files) * 100:.2f}%", style={'color': '#21130d'}),
+            html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'color': '#21130d'}),
+            html.P(f"F1 Score: {knn_f1:.2f}", style={'color': '#21130d'}),
+            dcc.Graph(figure=knn_conf_matrix_fig)
+        ])
+
+        gb_results = html.Div([
+            html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.P(f"Test/Training: {(gb_total_test_files/gb_total_train_files) * 100:.2f}%", style={'color': '#21130d'}),
+            html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'color': '#21130d'}),
+            html.P(f"F1 Score: {gb_f1:.2f}", style={'color': '#21130d'}),
+            dcc.Graph(figure=gb_conf_matrix_fig)
+        ])
+
+        return rf_results,knn_results,gb_results
+
+    return html.Div(),html.Div(),html.Div()
+
 # Adjust the size of each graph
-graph_style = {'width': '25%', 'height': '400px'}
+graph_style = {'width': '30%', 'height': '400px'}
 
 # Apply the size to each graph
-for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count','training-test-files-bar-chart']:
+for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
     data_and_ml_training_layout[graph_id].style = graph_style
-
 
 
 # Define the layout for the Dashboard tab
@@ -293,6 +370,7 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     }
 
     return trend_figure, pie_figure,bar_figure, data_count,ransomware_count,ransomware_percent,ransomware_types_count
+
 
 # Define the layout with tabs
 # Define the layout

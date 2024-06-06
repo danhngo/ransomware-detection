@@ -121,6 +121,10 @@ body {
   flex: 1;
 }
 
+#trained_count,#benign_count,#trained_ransomware_count,#entropy_count,#file_size_count {
+  flex: 1;
+}
+
 
 #tripleContainer {
   display: flex;
