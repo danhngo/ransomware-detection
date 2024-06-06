@@ -21,7 +21,7 @@ def scan_all_files(folder_path):
         for file_name in files:
             if file_name != ".DS_Store":
                 file_path = os.path.join(root, file_name)
-                hash_value, file_size, entropy = scan.file_size_entropy_and_hash(file_path)
+                hash_value, file_size, entropy,header_size = scan.file_size_entropy_and_hash(file_path)
                 # Determine ransomware value based on folder or subfolder name
                 ransomware = 1 if "ransomware" in root.lower() else 0
                 # Determine ransomware type based on folder or subfolder name
@@ -58,7 +58,7 @@ def scan_all_files(folder_path):
                     # Extract file extension
                     _, file_extension = os.path.splitext(file_name)
                     # Append file details to the list
-                    file_details.append((file_name, hash_value, file_extension, file_size, entropy, ransomware,ransomware_type,high_entropy,today_date))
+                    file_details.append((file_name, hash_value, file_extension, file_size, entropy,header_size, ransomware,ransomware_type,high_entropy,today_date))
     return file_details
 
 
@@ -66,7 +66,7 @@ def write_to_csv(file_details, csv_filename):
     """Write file details to a CSV file."""
     with open(csv_filename, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(['File Name', 'Hash', 'File Type', 'File Size', 'Entropy', 'Ransomware','Ransomware Type','High Entropy','Date'])  # Write header
+        csv_writer.writerow(['File Name', 'Hash', 'File Type', 'File Size', 'Entropy','Header Size', 'Ransomware','Ransomware Type','High Entropy','Date'])  # Write header
         csv_writer.writerows(file_details)
 
 if __name__ == "__main__":
