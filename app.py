@@ -116,13 +116,23 @@ data_and_ml_training_layout = html.Div([
     
     html.Div([
          html.Div([
-            html.Button('Machine Learning Training', id='train-button', n_clicks=0),
-            html.Div(id='rf-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-            html.Div(id='knn-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-            html.Div(id='gb-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'})
+            html.Button('Start Machine Learning', id='train-button', n_clicks=0),
         ], style={'text-align': 'center', 'margin': '20px'}),
+    ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap','padding-top':'20px', 'margin': '20px'}),
+
+    html.Div([
+        html.Div(id='rf-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        html.Div(id='knn-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        html.Div(id='gb-training-results', style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap','padding-top':'20px', 'margin': '20px'})
 ])
+
+# Adjust the size of each graph
+graph_style = {'width': '30%', 'height': '400px'}
+
+# Apply the size to each graph
+for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
+    data_and_ml_training_layout[graph_id].style = graph_style
 
 @app.callback(
     [Output('rf-training-results', 'children'),
@@ -167,25 +177,25 @@ def machine_learning_train(n_clicks):
         # Create a summary of results
         rf_results = html.Div([
             html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Test/Training: {(rf_total_test_files/rf_total_train_files) * 100:.2f}%", style={'color': '#21130d'}),
-            html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'color': '#21130d'}),
-            html.P(f"F1 Score: {rf_f1:.2f}", style={'color': '#21130d'}),
+            html.P(f"Test/Training: {(rf_total_test_files/rf_total_train_files) * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.P(f"F1 Score: {rf_f1:.2f}", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=rf_conf_matrix_fig)
         ])
 
         knn_results = html.Div([
             html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Test/Training: {(knn_total_test_files/knn_total_train_files) * 100:.2f}%", style={'color': '#21130d'}),
-            html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'color': '#21130d'}),
-            html.P(f"F1 Score: {knn_f1:.2f}", style={'color': '#21130d'}),
+            html.P(f"Test/Training: {(knn_total_test_files/knn_total_train_files) * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.P(f"F1 Score: {knn_f1:.2f}", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=knn_conf_matrix_fig)
         ])
 
         gb_results = html.Div([
             html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Test/Training: {(gb_total_test_files/gb_total_train_files) * 100:.2f}%", style={'color': '#21130d'}),
-            html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'color': '#21130d'}),
-            html.P(f"F1 Score: {gb_f1:.2f}", style={'color': '#21130d'}),
+            html.P(f"Test/Training: {(gb_total_test_files/gb_total_train_files) * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
+            html.P(f"F1 Score: {gb_f1:.2f}", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=gb_conf_matrix_fig)
         ])
 
@@ -193,12 +203,7 @@ def machine_learning_train(n_clicks):
 
     return html.Div(),html.Div(),html.Div()
 
-# Adjust the size of each graph
-graph_style = {'width': '30%', 'height': '400px'}
 
-# Apply the size to each graph
-for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
-    data_and_ml_training_layout[graph_id].style = graph_style
 
 
 # Define the layout for the Dashboard tab
@@ -384,7 +389,7 @@ app.layout = html.Div(
                     id="tabs",
                     value="tab-1",
                     children=[
-                        dcc.Tab(label='Data & ML Training', children=[data_and_ml_training_layout], className="tab-style", selected_className="tab-style--selected"),
+                        dcc.Tab(label='Data & Machine Learning Training', children=[data_and_ml_training_layout], className="tab-style", selected_className="tab-style--selected"),
                         dcc.Tab(label='Ransomware Dashboard', children=[dashboard_layout], className="tab-style", selected_className="tab-style--selected")
                     ]
                 )
