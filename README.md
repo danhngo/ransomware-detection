@@ -6,7 +6,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 # 2. Install requirment
-pip3 install -r requirement.txt
+pip3 install -r requirements.txt
 
 # 3. Run App
 python3 app.py
@@ -21,12 +21,12 @@ python3 ransomware-detection.py
 nohup python3 app.py &
 
 # 7. Server Info
-ssh docker@40.121.214.159 
-cd /home/docker/ransomware-detection-main
-http://40.121.214.159:8050/
+ssh danh@172.208.119.43
+git clone git@github.com:danhngo/ransomware-detection.git
+cd /home/danh/ransomware-detection-main
+http://172.208.119.43:8060/
 
-lsof -i tcp:8050
-https://coolors.co/palettes/trending
+lsof -i tcp:8060
 
 pip3 install opencv-python
 
