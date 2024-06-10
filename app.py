@@ -29,12 +29,14 @@ ransomware_percent = ransomware_count / train_count * 100
 entropy_mean = data_original['Entropy'].mean()    
 file_size_mean = data_original['File Size'].mean() / 1000000
   
-scan_data = pd.read_csv("predict/ransomware_detection.csv")
-scan_data['Date'] = pd.to_datetime(scan_data['Date'], format='mixed')
+#scan_data = pd.read_csv("predict/ransomware_detection.csv")
+#scan_data['Date'] = pd.to_datetime(scan_data['Date'], format='mixed')
 
 # Filter scan_data
-ransomware_data = scan_data[(scan_data['Ransomware'] == 1) & (scan_data['Ransomware Type'] != 'unknow') & (scan_data['Ransomware Type'] != 'MAZE')]
-ransomware_types = ransomware_data['Ransomware Type'].dropna().unique()
+#ransomware_data = scan_data[(scan_data['Ransomware'] == 1) & (scan_data['Ransomware Type'] != 'unknow') & (scan_data['Ransomware Type'] != 'MAZE')]
+#ransomware_types = ransomware_data['Ransomware Type'].dropna().unique()
+
+ransomware_types = ['DHARMA', 'NETWALKER', 'PHOBOS', 'SODINOKIBI']
 
 # Mapping for x-axis labels
 label_mapping = {0: 'Benign', 1: 'Ransomware'}
@@ -360,6 +362,13 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
         start_date = datetime.datetime.now() - datetime.timedelta(days=365)
     else:
         start_date = datetime.datetime.min
+
+    scan_data = pd.read_csv("predict/ransomware_detection.csv")
+    scan_data['Date'] = pd.to_datetime(scan_data['Date'], format='mixed')
+
+    # Filter scan_data
+    ransomware_data = scan_data[(scan_data['Ransomware'] == 1) & (scan_data['Ransomware Type'] != 'unknow') & (scan_data['Ransomware Type'] != 'MAZE')]
+    #ransomware_types = ransomware_data['Ransomware Type'].dropna().unique()
 
     total_data = scan_data[scan_data['Date'] >= start_date]
     filtered_data = ransomware_data[ransomware_data['Date'] >= start_date]
