@@ -73,7 +73,7 @@ def scan_all_files(folder_path):
            
                 # Get the creation time of the file
                 creation_time = os.path.getctime(file_path)
-                added_date = datetime.fromtimestamp(creation_time).strftime('%Y-%m-%d %H:%M:%S')
+                added_date = datetime.fromtimestamp(creation_time).strftime('%Y-%m-%d')
                 file_details.append((file_name, hash_value,file_extension, file_size, entropy,header_size, added_date,ransomware_type,''))
                     
     return file_details
