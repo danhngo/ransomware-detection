@@ -30,5 +30,17 @@ lsof -i tcp:8060
 
 pip3 install opencv-python
 
+
+# 8. Presentation
+1. Name for all the charts
+2. Show seperate between train data /  test data (ransomeware detection)
+3. Dont show the result 1st (2nd tab)
+4. Run ransomware detection.
+5. Show ransomware detection result. 
+--> live visulaization on the work. 
+
+6. Recently attacks on supply chain, ... violiation on regulatory. 
+
+
  
  

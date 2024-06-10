@@ -10,23 +10,23 @@ from sklearn.preprocessing import StandardScaler
 import warnings
 warnings.filterwarnings("ignore", message="X does not have valid feature names, but StandardScaler was fitted with feature names")
 
-folder_paths = "/Users/admin/11.SaskPoly/4.capstone/test/files"  # Add more folder paths as needed
 train_folder = "data"
 pretrain_data = "pretrained_data.csv"
 output_file = "scan_files.csv"
 predict_folder = "predict"
 
-
-def scan_all(folder_path):
-    print(f"Scan Folder and subfolders of {folder_path}")
+def scan_all():
+    
     try:
-        file_details = scan_all_files(folder_path)
-
         # Get the current directory
         current_directory = os.getcwd()
         parent_directory = os.path.dirname(current_directory)
         # Define folder paths
         print(f"Parent is {parent_directory}")
+        folder_path = os.path.join(parent_directory, "test")
+        print(f"Scan Folder and subfolders of {folder_path}")
+        file_details = scan_all_files(folder_path)
+        
         output_folder = os.path.join(parent_directory, "scan")
         # Create output folder if it doesn't exist
         if not os.path.exists(output_folder):
@@ -120,7 +120,7 @@ def ransomware_detection():
            
 
 # Schedule the job to run every 5 minutes
-schedule.every(1).minutes.do(scan_all, folder_paths)
+schedule.every(1).minutes.do(scan_all)
 
 while True:
     schedule.run_pending()
