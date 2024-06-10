@@ -190,25 +190,19 @@ def machine_learning_train(n_clicks):
         # Create a summary of results
         rf_results = html.Div([
             html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Test/Training: {(rf_total_test_files/rf_total_train_files) * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
             html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
-            html.P(f"F1 Score: {rf_f1:.2f}", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=rf_conf_matrix_fig)
         ])
 
         knn_results = html.Div([
             html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Test/Training: {(knn_total_test_files/knn_total_train_files) * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
             html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
-            html.P(f"F1 Score: {knn_f1:.2f}", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=knn_conf_matrix_fig)
         ])
 
         gb_results = html.Div([
             html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
-            html.P(f"Test/Training: {(gb_total_test_files/gb_total_train_files) * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
             html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
-            html.P(f"F1 Score: {gb_f1:.2f}", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=gb_conf_matrix_fig)
         ])
 

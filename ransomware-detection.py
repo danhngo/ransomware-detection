@@ -36,7 +36,6 @@ def scan_all():
         write_to_csv(file_details, csv_filename)
         print("Write files completed.")
         ransomware_detection()
-        print("Ransomware detection completed.")
     except Exception as e:
         print(f"Error scanning files and writing to CSV: {e}")
 
@@ -97,7 +96,7 @@ def ransomware_detection():
     x = data[['File Size', 'Entropy']]
     y = data['Ransomware']
     rf_accuracy, _, _, _,_,_ = ml.rf_evaluate(x, y)
-    print(f"Model evaluated, accuracy: {rf_accuracy}")
+    #print(f"Model evaluated, accuracy: {rf_accuracy}")
     print("Starting ransomware prediction...")
   
     # Load the data from scan_files.csv
@@ -105,7 +104,7 @@ def ransomware_detection():
     current_directory = os.getcwd()
     parent_directory = os.path.dirname(current_directory)
     # Define folder paths
-    print(f"Parent is {parent_directory}")
+    #print(f"Parent is {parent_directory}")
     output_folder = os.path.join(parent_directory, "scan")
     print(f"Read data from {output_folder}")
     new_data = pd.read_csv(os.path.join(output_folder, output_file))
@@ -117,6 +116,7 @@ def ransomware_detection():
     # Write the results back to the CSV file
     new_data['Ransomware'] = predictions
     new_data.to_csv(os.path.join(predict_folder, "ransomware_detection.csv"), index=False)
+    print("Ransomware detection completed.")
            
 
 # Schedule the job to run every 5 minutes
