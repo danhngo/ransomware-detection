@@ -55,15 +55,15 @@ def scan_all_files(folder_path):
                 file_extension = file_extension.lower()
                 # Determine if file is ransomware
                 dharma_type = ['.cmb']
-                maze_type = ['.kwsa5','.9s3mbk','.7rpdf','.lmbcde','.vrzpos9','.ipgagl','.20tqe','','.ovf1gdz','.xcxy','.mbm2pp','.hgac2mm','.0xolyoi','.uaxs','.ddm8mzf','.gkxvt','.ymf7','.dorw','.srdvq','.qj1jc','.6jzna','.dzryy','.74wb','.akzkf8']
+                #maze_type = ['.kwsa5','.9s3mbk','.7rpdf','.lmbcde','.vrzpos9','.ipgagl','.20tqe','','.ovf1gdz','.xcxy','.mbm2pp','.hgac2mm','.0xolyoi','.uaxs','.ddm8mzf','.gkxvt','.ymf7','.dorw','.srdvq','.qj1jc','.6jzna','.dzryy','.74wb','.akzkf8']
                 netwalker_type = ['.c924ca']
                 phobos_type = ['.acute']
                 sodinokibi_type = ['.wiyn0sx9jt']
                 ransomware_type = "unknow"
                 if any(file_extension in x for x in dharma_type):
                     ransomware_type = "DHARMA"
-                elif any(file_extension in x for x in maze_type):
-                    ransomware_type = "MAZE"
+                #elif any(file_extension in x for x in maze_type):
+                    #ransomware_type = "MAZE"
                 elif any(file_extension in x for x in netwalker_type):
                     ransomware_type = "NETWALKER"
                 elif any(file_extension in x for x in phobos_type):

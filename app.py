@@ -10,6 +10,7 @@ from dash.dependencies import Input, Output, State
 import datetime
 import plotly.graph_objs as go
 import time  # Import the time module
+import plotly.figure_factory as ff
 
 
 # Suppress warnings
@@ -32,8 +33,12 @@ scan_data = pd.read_csv("predict/ransomware_detection.csv")
 scan_data['Date'] = pd.to_datetime(scan_data['Date'], format='mixed')
 
 # Filter scan_data
-ransomware_data = scan_data[(scan_data['Ransomware'] == 1) & (scan_data['Ransomware Type'] != 'unknow')]
+ransomware_data = scan_data[(scan_data['Ransomware'] == 1) & (scan_data['Ransomware Type'] != 'unknow') & (scan_data['Ransomware Type'] != 'MAZE')]
 ransomware_types = ransomware_data['Ransomware Type'].dropna().unique()
+
+# Mapping for x-axis labels
+label_mapping = {0: 'Benign', 1: 'Ransomware'}
+data_original['Ransomware_Label'] = data_original['Ransomware'].map(label_mapping)
 
 
 # Standardize data
@@ -50,6 +55,21 @@ nb_accuracy, _, _, nb_confmatrix, nb_total_train_files, nb_total_test_files = ml
 rf_accuracy, _, _, rf_confmatrix, rf_total_train_files, rf_total_test_files = ml.rf_evaluate(x, y)
 gb_accuracy, _, _, gb_confmatrix, gb_total_train_files, gb_total_test_files = ml.gb_evaluate(x, y)
 
+# Create figure
+ransomware_benign_fig = px.bar(
+    data_original['Ransomware_Label'].value_counts(),
+    x=data_original['Ransomware_Label'].value_counts().index,
+    y=data_original['Ransomware_Label'].value_counts(),
+    title='Benign vs. Ransomware',
+    color_discrete_sequence=['#778da9']
+)
+
+# Update layout to add axis titles
+ransomware_benign_fig.update_layout(
+    xaxis_title="Type",
+    yaxis_title="Count"
+)
+
 # Create Dash app
 external_stylesheets = ['styles.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -58,7 +78,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 header_layout = html.Header(
     className='header',
     children=[
-        html.H1("AI-powered Ransomware Detection System")
+        html.H1("Machine Learning System for Ransomware Detection")
     ]
 )
 
@@ -98,7 +118,7 @@ data_and_ml_training_layout = html.Div([
                         className="mini_container",
                     ),
                     html.Div(
-                        [html.H6(f"{file_size_mean:.2f} M"), html.P("File Size Mean")],
+                        [html.H6(f"{file_size_mean:.2f} Mb"), html.P("File Size Mean")],
                         id="file_size_count",
                         className="mini_container",
                     ),
@@ -110,7 +130,7 @@ data_and_ml_training_layout = html.Div([
     ),
    
     html.Div([
-        dcc.Graph(id='ransomware-count', figure=px.bar(data_original['Ransomware'].value_counts(), x=data_original['Ransomware'].value_counts().index, y=data_original['Ransomware'].value_counts(), title='Benign vs. Ransomware', color_discrete_sequence=['#778da9'])),
+        dcc.Graph(id='ransomware-begign-fig', figure=ransomware_benign_fig),
         dcc.Graph(id='entropy-histogram', figure=px.histogram(data_original, x='Entropy', nbins=10, title='Distribution of Entropy', color_discrete_sequence=['#778da9'])),
         dcc.Graph(id='file-size-histogram', figure=px.histogram(data_original, x='File Size', nbins=10, title='Distribution of File Size', color_discrete_sequence=['#778da9'])), 
     ], style={'display': 'flex', 'justify-content': 'space-around', 'flex-wrap': 'wrap', 'margin': '20px'}),
@@ -141,7 +161,7 @@ data_and_ml_training_layout = html.Div([
 graph_style = {'width': '30%', 'height': '400px'}
 
 # Apply the size to each graph
-for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-count']:
+for graph_id in ['file-size-histogram', 'entropy-histogram', 'ransomware-begign-fig']:
     data_and_ml_training_layout[graph_id].style = graph_style
 
 @app.callback(
@@ -161,47 +181,74 @@ def machine_learning_train(n_clicks):
         knn_accuracy, knn_report, knn_f1, knn_confmatrix, knn_total_train_files, knn_total_test_files = ml.knn_evaluate(x, y)
         # Train the Gradient Boosting model
         gb_accuracy, gb_report, gb_f1, gb_confmatrix, gb_total_train_files, gb_total_test_files = ml.gb_evaluate(x, y)
-        
+
+        # Custom labels
+        prediction_x_labels = ['Benign', 'Ransomware']
+        prediction_y_labels = ['Benign', 'Ransomware']
+
         # Create the confusion matrix heatmap
         rf_conf_matrix_fig = ff.create_annotated_heatmap(
             z=rf_confmatrix,
-            x=['0', '1'],
-            y=['0', '1'],
+            x=prediction_x_labels,
+            y=prediction_y_labels,
             colorscale='teal',
-            reversescale=False
+            reversescale=False,
+            annotation_text=[[str(y) for y in x] for x in rf_confmatrix],
+            hoverinfo="z"
+        )
+        # Customize layout
+        rf_conf_matrix_fig.update_layout(
+            xaxis=dict(title='Predicted'),
+            yaxis=dict(title='Actual')
         )
 
+        # Create the confusion matrix heatmap
         knn_conf_matrix_fig = ff.create_annotated_heatmap(
             z=knn_confmatrix,
-            x=['0', '1'],
-            y=['0', '1'],
+            x=prediction_x_labels,
+            y=prediction_y_labels,
             colorscale='teal',
-            reversescale=False
+            reversescale=False,
+            annotation_text=[[str(y) for y in x] for x in knn_confmatrix],
+            hoverinfo="z"
+        )
+        # Customize layout
+        knn_conf_matrix_fig.update_layout(
+            xaxis=dict(title='Predicted'),
+            yaxis=dict(title='Actual')
         )
 
+        # Create the confusion matrix heatmap
         gb_conf_matrix_fig = ff.create_annotated_heatmap(
             z=gb_confmatrix,
-            x=['0', '1'],
-            y=['0', '1'],
+            x=prediction_x_labels,
+            y=prediction_y_labels,
             colorscale='teal',
-            reversescale=False
+            reversescale=False,
+            annotation_text=[[str(y) for y in x] for x in gb_confmatrix],
+            hoverinfo="z"
+        )
+        # Customize layout
+        gb_conf_matrix_fig.update_layout(
+            xaxis=dict(title='Predicted'),
+            yaxis=dict(title='Actual')
         )
 
         # Create a summary of results
         rf_results = html.Div([
-            html.H4("Random Forest", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.H4("Random Forest Model", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
             html.P(f"Accuracy: {rf_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=rf_conf_matrix_fig)
         ])
 
         knn_results = html.Div([
-            html.H4("kNN", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.H4("kNN Model", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
             html.P(f"Accuracy: {knn_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=knn_conf_matrix_fig)
         ])
 
         gb_results = html.Div([
-            html.H4("Gradient Boosting", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
+            html.H4("Gradient Boosting Model", style={'text-align': 'center', 'margin-bottom': '10px', 'color': '#21130d'}),
             html.P(f"Accuracy: {gb_accuracy * 100:.2f}%", style={'text-align': 'center','color': '#21130d'}),
             dcc.Graph(figure=gb_conf_matrix_fig)
         ])
@@ -225,7 +272,7 @@ dashboard_layout = html.Div([
                 {'label': 'Last Year', 'value': 'last_year'},
                 {'label': 'All', 'value': 'all'}
             ],
-            value='last_month',
+            value='last_week',
             className="dcc_control",
         ),
         html.Label('Ransomware Types:'),
@@ -365,7 +412,7 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     ransomware_type_counts.columns = ['Ransomware Type', 'Count']
 
     bar_data = [
-        go.Bar(name='Total Scan Files', x=['Total Scan Files'], y=[data_count])
+        go.Bar(name='All Types', x=['All Types'], y=[data_count])
     ]
 
     for index, row in ransomware_type_counts.iterrows():
@@ -374,8 +421,8 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     bar_figure = {
         'data': bar_data,
         'layout': go.Layout(
-            title='Total Scan Files and Ransomware Counts',
-            xaxis={'title': 'No. of Files'},
+            title='Ransomware Count by Type',
+            xaxis={'title': 'Type'},
             yaxis={'title': 'Count'},
             barmode='group'
         )
@@ -397,7 +444,7 @@ app.layout = html.Div(
                     value="tab-1",
                     children=[
                         dcc.Tab(label='Data & Machine Learning Training', children=[data_and_ml_training_layout], className="tab-style", selected_className="tab-style--selected"),
-                        dcc.Tab(label='Ransomware Dashboard', children=[dashboard_layout], className="tab-style", selected_className="tab-style--selected")
+                        dcc.Tab(label='Ransomware Prediction', children=[dashboard_layout], className="tab-style", selected_className="tab-style--selected")
                     ]
                 )
             ]
@@ -408,4 +455,4 @@ app.layout = html.Div(
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8060)
+    app.run_server(host='0.0.0.0', port=8060, debug=True)
