@@ -23,19 +23,10 @@ nohup python3 app.py &
 # 7. Server Info
 ssh danh@172.208.119.43
 git clone git@github.com:danhngo/ransomware-detection.git
-cd /home/danh/ransomware-detection-main
+/home/danh/ransomware-detection
 http://172.208.119.43:8060/
-
 lsof -i tcp:8060
 
-pip3 install opencv-python
-
-
-# 8. Presentation
-Show ransomware detection result. 
-a. Show seperate between train data /  test data (ransomeware detection)
-b. Dont show the result 1st (2nd tab)
-c. Run ransomware detection.
 
 
 
