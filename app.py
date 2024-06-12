@@ -52,10 +52,15 @@ x = data[['File Size', 'Entropy']]
 y = data['Ransomware']
 
 # Run classifiers
-knn_accuracy, _, _, knn_confmatrix, knn_total_train_files, knn_total_test_files = ml.knn_evaluate(x, y)
-nb_accuracy, _, _, nb_confmatrix, nb_total_train_files, nb_total_test_files = ml.nb_evaluate(x, y)
-rf_accuracy, _, _, rf_confmatrix, rf_total_train_files, rf_total_test_files = ml.rf_evaluate(x, y)
-gb_accuracy, _, _, gb_confmatrix, gb_total_train_files, gb_total_test_files = ml.gb_evaluate(x, y)
+knn_accuracy, _, knn_f1, knn_confmatrix, knn_total_train_files, knn_total_test_files = ml.knn_evaluate(x, y)
+nb_accuracy, _, nb_f1, nb_confmatrix, nb_total_train_files, nb_total_test_files = ml.nb_evaluate(x, y)
+rf_accuracy, _, rf_f1, rf_confmatrix, rf_total_train_files, rf_total_test_files = ml.rf_evaluate(x, y)
+gb_accuracy, _, gb_f1, gb_confmatrix, gb_total_train_files, gb_total_test_files = ml.gb_evaluate(x, y)
+
+print(f"kNN is {knn_accuracy}, {knn_f1}")
+print(f"Naive Bayes is {nb_accuracy}, {nb_f1}")
+print(f"Random Forest is {rf_accuracy}, {rf_f1}")
+print(f"Gradient Boosting is {gb_accuracy}, {gb_f1}")
 
 # Create figure
 ransomware_benign_fig = px.bar(
@@ -453,7 +458,7 @@ app.layout = html.Div(
                     value="tab-1",
                     children=[
                         dcc.Tab(label='Data & Machine Learning Training', children=[data_and_ml_training_layout], className="tab-style", selected_className="tab-style--selected"),
-                        dcc.Tab(label='Ransomware Prediction', children=[dashboard_layout], className="tab-style", selected_className="tab-style--selected")
+                        dcc.Tab(label='Ransomware Detection', children=[dashboard_layout], className="tab-style", selected_className="tab-style--selected")
                     ]
                 )
             ]

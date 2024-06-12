@@ -120,7 +120,7 @@ def ransomware_detection():
            
 
 # Schedule the job to run every 5 minutes
-schedule.every(10).seconds.do(scan_all)
+schedule.every(10).minutes.do(scan_all)
 
 while True:
     schedule.run_pending()
