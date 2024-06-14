@@ -279,7 +279,7 @@ dashboard_layout = html.Div([
                 {'label': 'Last Year', 'value': 'last_year'},
                 {'label': 'All', 'value': 'all'}
             ],
-            value='last_week',
+            value='last_month',
             className="dcc_control",
         ),
         html.Label('Ransomware Types:'),
