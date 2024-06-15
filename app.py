@@ -417,7 +417,7 @@ def update_ransomware_trend_and_pie(date_range, selected_ransomware):
     # Calculate counts
     data_count = len(total_data)
     ransomware_count = filtered_data['Ransomware'].sum()
-    ransomware_percent = '{1:.{0}f}%'.format(1, (ransomware_count / data_count * 100) / 10 ** 1) 
+    ransomware_percent = '{1:.{0}f}%'.format(1, ((ransomware_count / data_count) * 100) ** 1) 
     ransomware_types_count = len(filtered_data['Ransomware Type'].unique())
 
    
