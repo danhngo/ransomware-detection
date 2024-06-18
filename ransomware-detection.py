@@ -42,9 +42,9 @@ def scan_all():
 def scan_all_files(folder_path):
     """Recursively scan all files in the folder and subfolders."""
     file_details = []
-    today_date = datetime.today().strftime('%Y-%m-%d')
     for root, dirs, files in os.walk(folder_path):
-        print(f"Start scanning folder {root}...")
+        current_time = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print(f"{current_time} Start scanning folder {root}...")
         for file_name in files:
             if file_name != ".DS_Store":
                 file_path = os.path.join(root, file_name)
@@ -120,7 +120,7 @@ def ransomware_detection():
            
 
 # Schedule the job to run every 5 minutes
-schedule.every(10).minutes.do(scan_all)
+schedule.every(5).seconds.do(scan_all)
 
 while True:
     schedule.run_pending()
